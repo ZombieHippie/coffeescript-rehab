@@ -7,8 +7,8 @@ path = require('path')
 
 module.exports = class Rehab
 
-  String::beginsWith = (str) -> if @match(new RegExp "^#{str}") then true else false
-  String::endsWith = (str) -> if @match(new RegExp "#{str}$") then true else false
+  String::beginsWith = (str) -> @match(/// ^#{str} ///)?
+  String::endsWith = (str) -> @match(/// #{str}$ ///)?
 
   REQ_TOKEN: "#_require"
   REQ_MAIN_NODE: "__MAIN__"
@@ -51,8 +51,7 @@ module.exports = class Rehab
 
   normalizeCoffeeFilename: (file) ->
     file = "#{file}.coffee" unless file.endsWith ".coffee"
-    file = path.normalize file
-    file
+    path.normalize file
 
   processDependencyList: (depGraph) ->
     depList = tsort(depGraph)
@@ -63,15 +62,13 @@ module.exports = class Rehab
     (file for file in files when file.endsWith '.coffee')
 
   parseRequiredLine: (line) ->
-    line.replace "#{@REQ_TOKEN} ", ""
-
+    match = line.match ///^#{@REQ_TOKEN}\s+([\w\-\.]\.coffee)///
+    return if match? then match[1] else null
   parseRequiredFile: (folder, file, depGraph) ->
-    fileName = path.join(folder, file)
-    depGraph.push [fileName, @REQ_MAIN_NODE] #every file depends on MAIN (a fake file)
+    filePath = path.join(folder, file)
+    depGraph.push [filePath, @REQ_MAIN_NODE] #every file depends on MAIN (a fake file)
 
-    content = fs.readFileSync(fileName, 'utf8')
-    lines = content.split '\n'
-    for line in lines
-      line = line.slice(0, -1) if line.slice(-1) == '\r'
-      line = line.trim()
-      depGraph.push [fileName, @parseRequiredLine(line)] if line.beginsWith @REQ_TOKEN
+    content = fs.readFileSync(filePath, 'utf8')
+    for line in content.split /\s*[\n\r]+\s*/
+      if depFileName = @parseRequiredLine(line)
+        depGraph.push [filePath, depFileName]
