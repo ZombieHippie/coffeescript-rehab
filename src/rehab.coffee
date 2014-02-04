@@ -62,7 +62,7 @@ module.exports = class Rehab
     (file for file in files when file.endsWith '.coffee')
 
   parseRequiredLine: (line) ->
-    match = line.match ///^#{@REQ_TOKEN}\s+([\w\-\.]\.coffee)///
+    match = line.match ///^#{@REQ_TOKEN}\s+((?=coffee)coffee)///
     return if match? then match[1] else null
   parseRequiredFile: (folder, file, depGraph) ->
     filePath = path.join(folder, file)
