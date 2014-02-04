@@ -1,24 +1,21 @@
 {
-  "name": "rehab",
-  "version": "0.0.3",
-  "description": "Rehab helps you deal with your coffee dependency",
-  "main": "index.js",
-  "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script -R spec --require should test/*"
-  },
+  "name": "rehab2",
+  "version": "0.0.1",
+  "description": "Rehab helps you deal with your file dependencies",
+  "main": "./lib/rehab.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Vizir/rehab.git"
+    "url": "git://github.com/ZombieHippie/rehab.git"
   },
-  "author": "David Lojudice Sobrinho",
-  "license": "BSD",
+  "author": "Cole R Lawrence",
+  "contributors": ["David Lojudice Sobrinho"],
+  "license": "MIT",
   "dependencies": {
-    "wrench": "latest"
+    "wrench": "latest",
+    "deppy":"latest"
   },
   "devDependencies": {
-    "mocha": "latest",
-    "should": "latest",
     "coffee-script": "latest",
-    "source-map-support": "latest"
+    "rehab": "latest"
   }
 }
