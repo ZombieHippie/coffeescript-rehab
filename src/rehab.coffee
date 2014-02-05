@@ -1,82 +1,112 @@
-#_require ./tsort
-
-
 wrench = require('wrench')
 fs = require('fs')
-path = require('path')
+p = require('path')
+deppy = require('deppy')
+
+String::endsWith = (str) -> @match(/// #{str}$ ///)?
+String::getDir = ->
+  return if @endsWith '.coffee'
+  then p.dirname @
+  else @.toString()
 
 module.exports = class Rehab
+  constructor: (path=null)->
+    if not path?
+      console.warn "Path was not provided upon construction of new Rehab()"
+      return
+    @dep = deppy.create()
 
-  String::beginsWith = (str) -> @match(/// ^#{str} ///)?
-  String::endsWith = (str) -> @match(/// #{str}$ ///)?
-  String::dir = ->
-    return if @endsWith '.coffee'
-    then path.dirname @
-    else @.toString()
+    sources = @getSourceFiles(path)
+    sourceFolder = path.getDir()
+    @sources = []
+    @unresolved = []
+    @processDependencies(sources, sourceFolder)
+    while @unresolved.length
+      toResolve = @unresolved[0]
+      @processDependencies [p.basename toResolve], p.dirname toResolve
+    @dep(@REQ_MAIN_NODE, @sources)
+    #depGraph = @processDependencyGraph(filePath)
 
-  REQ_TOKEN: "#_require"
+    #depGraph = @normalizeFilename(filePath.getDir(), depGraph)
+    # create a list from a graph:
+    # A.coffee -> B.coffee -> C.coffee
+    #depList = @processDependencyList depGraph
+    
+    #depList.reverse() #yeah!
+  listFiles: =>
+    # resolve dependencies and filter out __MAIN__ node element
+    #console.log listSources:@sources
+    @dep.resolve(@REQ_MAIN_NODE).filter (elem)=> elem isnt @REQ_MAIN_NODE
+  compile: =>
+    coffee = require 'coffee-script'
+    code = ""
+    for source in @listFiles()
+      try
+        code += '\n'+fs.readFileSync source
+      catch err
+        if err.code is 'ENOENT' then return else throw err
+    return coffee.compile code
+
   REQ_MAIN_NODE: "__MAIN__"
+  REQ_LINE_REGEX: ///^
+    \#_require           #TOKEN
+    \s+
+    (.+(?=coffee)coffee) #FILEPATH
+  ///
 
   process: (filePath) ->
-    # create a graph from a filePath name: 
-    # src/C <- A -> B.coffee -> C
-    depGraph = @processDependencyGraph(filePath)
-    #console.log "1: processDependencyGraph", depGraph
+    return new Rehab(filePath).listFiles()
 
-    # normalize filenames:
-    # src/C.coffee <- src/A.coffee -> src/B.coffee -> src/C.coffee
-    depGraph = @normalizeFilename(filePath.dir(), depGraph)
-    #console.log "2: normalizeFilename", depGraph
-
-    # create a list from a graph: 
-    # A.coffee -> B.coffee -> C.coffee
-    depList = @processDependencyList depGraph
-    #console.log "3: processDependencyList", depList
-
-    depList.reverse() #yeah!
-
-  processDependencyGraph: (filePath) ->
-    depGraph = []
-    for f in (@getSourceFiles filePath)
-      @parseRequiredFile filePath.dir(), f, depGraph
-    depGraph
-
-  normalizeFilename: (folder, depGraph) ->
-    for edge in depGraph
-      continue if edge[1] == @REQ_MAIN_NODE
-
-      fileDep = @normalizeCoffeeFilename(edge[0])
-      file = @normalizeCoffeeFilename(edge[1])
-      
-      fullPath = path.resolve path.dirname(fileDep), file
-      file = path.join(folder, path.relative(folder, fullPath))
-      edge[0..1] = [fileDep, file]
-    depGraph
-
-  normalizeCoffeeFilename: (file) ->
-    file = "#{file}.coffee" unless file.endsWith ".coffee"
-    path.normalize file
-
-  processDependencyList: (depGraph) ->
-    depList = tsort(depGraph)
-    depList.filter (i) => not i.beginsWith @REQ_MAIN_NODE
-
+  processDependencies:(sources, folder) =>
+    #console.log "process:", sources
+    for fl in sources
+      filePath = p.resolve(folder, fl)
+      if filePath in @sources
+        #already evaluated
+        continue
+      #parse dependencies
+      deps = @parseFile fl, folder
+      # add to dependency graph
+      @dep(filePath, deps)
+      @sources.push filePath
+      for depend in deps
+        if(depend not in @sources)and(depend not in @unresolved)
+          #console.log {depend}
+          @unresolved.push depend
+      @unresolved = @unresolved.filter (elem)=>
+        elem not in @sources
+  normalizeCoffeeFile: (filename) ->
+    if not filename.endsWith '.coffee'
+      filename = filename + '.coffee'
+    return filename
   getSourceFiles: (filePath) ->
     if filePath.endsWith '.coffee'
-      return [path.basename filePath]
+      return [p.basename filePath]
     else
       files = wrench.readdirSyncRecursive filePath 
       (file for file in files when file.endsWith '.coffee')
+  parseFile: (file, folder) =>
+    file = @normalizeCoffeeFile file
+    filePath = p.resolve folder, file
 
-  parseRequiredLine: (line) ->
-    match = line.match ///^#{@REQ_TOKEN}\s+(.+(?=coffee)coffee)///
-    return if match? then match[1] else null
-  parseRequiredFile: (folder, file, depGraph) ->
-    #console.log {folder, file}
-    filePath = path.join(folder, file)
-    depGraph.push [filePath, @REQ_MAIN_NODE] #every file depends on MAIN (a fake file)
+    reqs = []
+    #split content into separate lines
+    content = fs.readFileSync(filePath, 'utf8')
+    #lines are split and trimmed
+    for line in content.split /\s*[\n\r]+\s*/
+      if requiredFile = line.match @REQ_LINE_REGEX
+        # get full path of file
+        reqFile = p.resolve folder+'relchild', requiredFile[1]
+        reqs.push reqFile
+    #console.log {file, reqs}
+    return reqs
+  parseRequiredFile: (folder, basename) =>
+    ##console.log {folder, file}
+    filePath = p.join(folder, basename)
+    reqs = [@REQ_MAIN_NODE] #every file depends on MAIN (a fake file)
 
     content = fs.readFileSync(filePath, 'utf8')
     for line in content.split /\s*[\n\r]+\s*/
-      if depFileName = @parseRequiredLine(line)
-        depGraph.push [filePath, depFileName]
+      if requiredFile = @parseRequiredLine(line)
+        reqs.push [requiredFile]
+    @dep(filePath, reqs)
