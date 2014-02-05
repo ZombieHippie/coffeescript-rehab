@@ -5,7 +5,7 @@
   "main": "./lib/rehab.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ZombieHippie/rehab.git"
+    "url": "git://github.com/ZombieHippie/rehab2.git"
   },
   "author": "Cole R Lawrence",
   "contributors": ["David Lojudice Sobrinho"],
