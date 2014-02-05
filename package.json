@@ -11,11 +11,11 @@
   "contributors": ["David Lojudice Sobrinho"],
   "license": "MIT",
   "dependencies": {
+    "coffee-script": "latest",
     "wrench": "latest",
     "deppy":"latest"
   },
   "devDependencies": {
-    "coffee-script": "latest",
     "rehab": "latest"
   }
 }
