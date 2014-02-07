@@ -1,6 +1,6 @@
 {
   "name": "rehab2",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Rehab helps you deal with your file dependencies",
   "main": "./lib/rehab.js",
   "repository": {
@@ -12,7 +12,11 @@
   "license": "MIT",
   "dependencies": {
     "coffee-script": "latest",
+    "stylus": "latest",
     "wrench": "latest",
     "deppy":"latest"
+  },
+  "devDependencies": {
+    "express":"3.x.x"
   }
 }

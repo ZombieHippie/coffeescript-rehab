@@ -11,5 +11,5 @@ my-reporter.js
 lib/browser/diff.js
 .idea
 *.iml
-example/project1/lib
+example/bin
 npm-debug.log

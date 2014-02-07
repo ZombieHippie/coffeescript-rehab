@@ -1,0 +1,14 @@
+fs = require 'fs'
+require 'coffee-script/register'
+Rehab = require '../src/rehab'
+
+# Make sure output directory is available
+fs.mkdirSync 'bin'
+
+task 'build:coffee', 'Compile coffee-script using Rehab', ->
+  rehab = new Rehab('./coffee')
+  fs.writeFileSync 'bin/compiled-coffeescript.js', rehab.compile()
+
+task 'build:styl', 'Compile stylus files using Rehab', ->
+  rehab = new Rehab('./styl')
+  fs.writeFileSync 'bin/compiled-stylus.css', rehab.compile()

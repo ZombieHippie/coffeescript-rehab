@@ -7,22 +7,31 @@ p = require 'path'
 
 module.exports = class Rehab
   constructor: (path=null, @ext = null)->
+    # Resolve full path
+    path = p.resolve path
+
     if not path?
       console.warn "Path was not provided upon construction of new Rehab()"
       return
+
+    # Check if directory
+    pathIsDirectory = p.extname(path) is ''
+
     @dep = deppy.create()
 
     @sources = []
     @unresolved = []
 
-    # Check if directory
-    if p.extname(path) is ''
+    # Set aside for caching and middleware usage
+    @srcdir = if pathIsDirectory then path else p.dirname path
+
+    if pathIsDirectory
       # Read directory of files and add to unresolved files
       for file in wrench.readdirSyncRecursive path
-        if p.extname(file) isnt ''
-          @unresolved.push(p.resolve(path, file)) 
+        if p.extname(file).match @ext
+          @unresolved.push(p.relative(path, file)) 
     else
-      @unresolved.push p.resolve path
+      @unresolved.push path
 
     # Determine extension
     if not @ext?
@@ -33,7 +42,6 @@ module.exports = class Rehab
 
     # Make a route that can sort all dependencies
     @dep(@REQ_MAIN_NODE, @sources)
-
   resolveDependencies: =>
     while loose = @unresolved[0]
       # Parse file for dependencies
@@ -54,13 +62,22 @@ module.exports = class Rehab
       for dependency in deps
         if(dependency not in @sources)
             @unresolved.push dependency
-
   listFiles: =>
     # resolve dependencies and filter out __MAIN__ node element
     @dep.resolve(@REQ_MAIN_NODE).filter (elem)=> elem isnt @REQ_MAIN_NODE
-  compile: =>
-    if fn = compiler[@ext]
-      return fn(@concat())
+  compile: (path = null) =>
+    ext = @ext
+    if path
+      # attempt lookup of precompiled file
+      ext = p.extname path
+
+    else
+      # for normal usage
+      str = @concat()
+
+    # Check if compiler for this filetype exists
+    if fn = compiler[ext]
+      return fn(str)
     else
       console.error "Can't compile files of type:"+@ext
       return null
@@ -72,5 +89,12 @@ module.exports = class Rehab
       catch err
         if err.code is 'ENOENT' then return else throw err
     code
-  process: (filePath) ->
+  @process: (filePath) ->
     return new Rehab(filePath, 'coffee').listFiles()
+  @use: (srcpath, ext) ->
+    srcpath = p.resolve srcpath
+    (req, res) ->
+      path = req.url[1...] # Remove first /
+        .replace /\.[a-zA-Z\.]+$/, '.'+ext # Replace extension
+      res.write new Rehab(p.resolve srcpath, path).compile()
+      res.end()
