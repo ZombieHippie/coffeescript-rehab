@@ -1,6 +1,6 @@
 # Rehab
 
-Rehab helps you deal with your coffee dependency
+Rehab helps you deal with your file dependencies
 
 ## Why do you think you're here?
 
@@ -31,9 +31,8 @@ With that on your troublesome files and Rehab will give you a list of files in t
 {exec} = require 'child_process'
 Rehab = require 'rehab'
 
-task 'build', 'Build coffee2js using Rehab', sbuild = ->
-  console.log "Building project from src/*.coffee to lib/app.js"
-
+task 'build', 'Compile CoffeeScript using Rehab', ->
+  console.log "Compiling project from src/*.coffee to lib/app.js"
   files = new Rehab().process './src'
   
   to_single_file = "--join lib/app.js"
@@ -41,6 +40,31 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
 
   exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
     throw err if err
+```
+
+## But wait there's more!
+
+You can use Rehab to concatenate all your favorite languages!
+- Stylus
+- LESS
+- SASS
+- JavaScript
+- Etc.
+
+###Just use a one line comment!
+
+In Stylus:
+*html.styl*
+```stylus
+html
+  background white
+```
+
+*body.styl*
+```stylus
+//require html
+body
+  background gray
 ```
 
 ## License

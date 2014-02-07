@@ -1,5 +1,5 @@
 example/
-node_modules/
 src/
 Cakefile
+.git*
 test.coffee
