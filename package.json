@@ -1,6 +1,6 @@
 {
   "name": "rehab2",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "description": "Rehab helps you deal with your file dependencies",
   "main": "./index.js",
   "repository": {
@@ -16,7 +16,8 @@
   "dependencies": {
     "coffee-script": "latest",
     "stylus": "latest",
-    "deppy":"latest"
+    "deppy":"latest",
+    "nib":"latest"
   },
   "devDependencies": {
     "express":"3.x.x"

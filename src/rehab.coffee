@@ -23,9 +23,14 @@ module.exports = class Rehab
     if pathIsDirectory
       # Read directory of files and add to unresolved files
       for file in fs.readdirSync path
+        console.log file
         # if directory
         continue if p.extname(file) is ''
-        @unresolved.push(p.resolve(path, file)) 
+        if @ext
+          if p.extname(file).match ///#{@ext}$///
+            @unresolved.push(p.resolve(path, file))
+        else
+          @unresolved.push(p.resolve(path, file))
     else
       @unresolved.push path
 
@@ -61,9 +66,10 @@ module.exports = class Rehab
   listFiles: =>
     # resolve dependencies and filter out __MAIN__ node element
     @dep.resolve(@REQ_MAIN_NODE).filter (elem)=> elem isnt @REQ_MAIN_NODE
-  compile: (path = null) =>
+  compile: (options = {}) =>
+    {path} = options
     ext = @ext
-    if path
+    if path?
       # attempt lookup of precompiled file
       ext = p.extname path
 
@@ -73,7 +79,7 @@ module.exports = class Rehab
 
     # Check if compiler for this filetype exists
     if fn = compiler[ext]
-      return fn(str, {path})
+      return fn(str, options)
     else
       console.error "Can't compile files of type:"+@ext
       return null
