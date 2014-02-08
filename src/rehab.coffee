@@ -7,7 +7,7 @@ p = require 'path'
 module.exports = class Rehab
   constructor: (path = "", @ext = null)->
     # Resolve full path
-    path = p.resolve __dirname, path
+    path = p.resolve path
 
     # Check if directory
     pathIsDirectory = p.extname(path) is ''
@@ -23,8 +23,9 @@ module.exports = class Rehab
     if pathIsDirectory
       # Read directory of files and add to unresolved files
       for file in fs.readdirSync path
-        if p.extname(file).match @ext
-          @unresolved.push(p.relative(path, file)) 
+        # if directory
+        continue if p.extname(file) is ''
+        @unresolved.push(p.resolve(path, file)) 
     else
       @unresolved.push path
 
@@ -72,7 +73,7 @@ module.exports = class Rehab
 
     # Check if compiler for this filetype exists
     if fn = compiler[ext]
-      return fn(str)
+      return fn(str, {path})
     else
       console.error "Can't compile files of type:"+@ext
       return null

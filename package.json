@@ -1,6 +1,6 @@
 {
   "name": "rehab2",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Rehab helps you deal with your file dependencies",
   "main": "./index.js",
   "repository": {
