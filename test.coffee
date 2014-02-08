@@ -1,4 +1,4 @@
-r = require './lib/rehab'
+r = require './src/rehab'
 r2 = new r 'example/coffee/src/'
 console.log r2.compile()
 

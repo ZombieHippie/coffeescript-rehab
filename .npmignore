@@ -1,5 +1,4 @@
 example/
-src/
 Cakefile
 .git*
 test.coffee

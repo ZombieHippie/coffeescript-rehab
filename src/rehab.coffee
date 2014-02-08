@@ -1,18 +1,13 @@
 deppy = require 'deppy'
-wrench = require 'wrench'
 parser = require './parser'
 compiler = require './compiler'
 fs = require 'fs'
 p = require 'path'
 
 module.exports = class Rehab
-  constructor: (path=null, @ext = null)->
+  constructor: (path = "", @ext = null)->
     # Resolve full path
-    path = p.resolve path
-
-    if not path?
-      console.warn "Path was not provided upon construction of new Rehab()"
-      return
+    path = p.resolve __dirname, path
 
     # Check if directory
     pathIsDirectory = p.extname(path) is ''
@@ -27,7 +22,7 @@ module.exports = class Rehab
 
     if pathIsDirectory
       # Read directory of files and add to unresolved files
-      for file in wrench.readdirSyncRecursive path
+      for file in fs.readdirSync path
         if p.extname(file).match @ext
           @unresolved.push(p.relative(path, file)) 
     else

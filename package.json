@@ -1,11 +1,14 @@
 {
   "name": "rehab2",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Rehab helps you deal with your file dependencies",
-  "main": "./lib/rehab.js",
+  "main": "./index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/ZombieHippie/rehab2.git"
+  },
+  "bin":{
+    "rehab": "./bin/rehab.js"
   },
   "author": "Cole R Lawrence",
   "contributors": ["David Lojudice Sobrinho"],
@@ -13,7 +16,6 @@
   "dependencies": {
     "coffee-script": "latest",
     "stylus": "latest",
-    "wrench": "latest",
     "deppy":"latest"
   },
   "devDependencies": {
