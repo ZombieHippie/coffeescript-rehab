@@ -6,6 +6,7 @@ p = require 'path'
 
 module.exports = class Rehab
   constructor: (path = "", @ext = null)->
+    @failed = false
     # Resolve full path
     path = p.resolve path
 
@@ -23,7 +24,7 @@ module.exports = class Rehab
     if pathIsDirectory
       # Read directory of files and add to unresolved files
       for file in fs.readdirSync path
-        console.log file
+        fext = p.extname(file)
         # if directory
         continue if p.extname(file) is ''
         if @ext
@@ -31,6 +32,10 @@ module.exports = class Rehab
             @unresolved.push(p.resolve(path, file))
         else
           @unresolved.push(p.resolve(path, file))
+      if @unresolved.length is 0
+        console.log "[Rehab] Didn't find any files in directory: "+path
+        @failed = true
+        return
     else
       @unresolved.push path
 
@@ -64,9 +69,11 @@ module.exports = class Rehab
         if(dependency not in @sources)
             @unresolved.push dependency
   listFiles: =>
+    return null if @failed
     # resolve dependencies and filter out __MAIN__ node element
     @dep.resolve(@REQ_MAIN_NODE).filter (elem)=> elem isnt @REQ_MAIN_NODE
   compile: (options = {}) =>
+    return null if @failed
     {path} = options
     ext = @ext
     if path?
@@ -81,9 +88,10 @@ module.exports = class Rehab
     if fn = compiler[ext]
       return fn(str, options)
     else
-      console.error "Can't compile files of type:"+@ext
+      console.error "[Rehab] Can't compile files of type:"+@ext
       return null
   concat: =>
+    return null if @failed
     code = ""
     for source in @listFiles()
       try

@@ -7,11 +7,13 @@ module.exports = {
   styl: (contents, options = {})->
     return stylus(contents).use(nib()).render()
   ext: (ext)->
+    if not ext?
+      return null
     switch ext.toLowerCase().replace '.', ''
-      when 'js'
-        return 'coffee'
-      when 'css'
-        return 'styl'
+      when 'coffee'
+        return 'js'
+      when 'styl'
+        return 'css'
       else
         return null
 }
