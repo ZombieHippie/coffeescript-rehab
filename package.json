@@ -1,7 +1,7 @@
 {
-  "name": "rehab2",
+  "name": "coffeescript-rehab",
   "version": "0.3.6",
-  "description": "[project continued as coffeescript-rehab] Rehab helps you deal with your file dependencies!",
+  "description": "Rehab helps you deal with your coffeescript dependencies!",
   "main": "./index.js",
   "repository": {
     "type": "git",
