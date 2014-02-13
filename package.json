@@ -1,11 +1,11 @@
 {
   "name": "rehab2",
-  "version": "0.3.5",
-  "description": "Rehab helps you deal with your file dependencies",
+  "version": "0.3.6",
+  "description": "[project continued as coffeescript-rehab] Rehab helps you deal with your file dependencies!",
   "main": "./index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ZombieHippie/rehab2.git"
+    "url": "git://github.com/ZombieHippie/coffeescript-rehab.git"
   },
   "bin":{
     "rehab": "./bin/rehab.js"

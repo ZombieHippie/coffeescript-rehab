@@ -1,4 +1,4 @@
-# Rehab
+# Coffeescript Rehab
 
 Rehab helps you deal with your file dependencies
 
@@ -29,7 +29,7 @@ With that on your troublesome files and Rehab will give you a list of files in t
 
 ```coffeescript
 {exec} = require 'child_process'
-Rehab = require 'rehab'
+Rehab = require 'coffeescript-rehab'
 
 task 'build', 'Compile CoffeeScript using Rehab', ->
   console.log "Compiling project from src/*.coffee to lib/app.js"
@@ -42,6 +42,13 @@ task 'build', 'Compile CoffeeScript using Rehab', ->
     throw err if err
 ```
 
+## Or use the  CLI!
+If you install coffeescript-rehab globally, you can use it in the command line!
+
+`npm install -g coffeescript-rehab`
+
+Use:
+`rehab main.coffee` or `rehab directory` or `rehab directory ../fileoutput.js`
 ## But wait there's more!
 
 You can use Rehab to concatenate all your favorite languages!
@@ -54,6 +61,7 @@ You can use Rehab to concatenate all your favorite languages!
 ###Just use a one line comment!
 
 In Stylus:
+
 *html.styl*
 ```stylus
 html
@@ -66,6 +74,7 @@ html
 body
   background gray
 ```
+
 
 ## License
 
